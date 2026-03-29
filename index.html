@@ -65,12 +65,6 @@
       margin-bottom: 14px;
     }
 
-    @media (max-width: 768px) {
-      .search-slot {
-        margin-top: 10dvh;
-      }
-    }
-
     .search-mini {
       width: 100%;
       display: flex;
@@ -542,6 +536,55 @@
 
     .attribution a:hover {
       border-bottom-color: var(--accent);
+    }
+
+    /* —— 手机：卡片正方形、宽 90%，与搜索条同宽；减少上下留白 —— */
+    @media (max-width: 768px) {
+      .app {
+        justify-content: flex-start;
+        padding: max(6px, env(safe-area-inset-top)) max(5vw, env(safe-area-inset-right))
+          max(10px, env(safe-area-inset-bottom)) max(5vw, env(safe-area-inset-left));
+      }
+
+      .search-slot {
+        width: 90%;
+        max-width: none;
+        margin-top: max(2px, env(safe-area-inset-top));
+        margin-bottom: 10px;
+      }
+
+      .search-panel {
+        width: 90%;
+        max-width: none;
+      }
+
+      .stage-strip {
+        flex: 0 1 auto;
+        align-items: flex-start;
+      }
+
+      .stage {
+        width: 90%;
+        max-width: none;
+        justify-content: flex-start;
+        align-items: stretch;
+      }
+
+      .card-frame {
+        width: 100%;
+        aspect-ratio: 1;
+        max-height: none;
+      }
+
+      .hints {
+        margin-top: 10px;
+      }
+
+      .attribution {
+        max-width: none;
+        width: 100%;
+        margin-top: 8px;
+      }
     }
   </style>
 </head>
