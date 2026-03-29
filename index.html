@@ -1,0 +1,1400 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>花与植物 · 静态百科</title>
+  <link rel="icon" href="./magnum.ico" type="image/x-icon">
+  <style>
+    :root {
+      --bg: #0f1419;
+      --bg-soft: #1a222d;
+      --card: #ffffff;
+      --text: #e8eef4;
+      --muted: #8b9cb0;
+      --accent: #7dd3a8;
+      --accent-dim: rgba(125, 211, 168, 0.25);
+      --danger: #f0a0a8;
+      --shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+      --radius: 20px;
+      --font: "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      min-height: 100%;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: var(--font);
+      background: radial-gradient(120% 80% at 50% 0%, #1e2a38 0%, var(--bg) 55%);
+      color: var(--text);
+    }
+
+    .app {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+        max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      transition: filter 0.45s ease, opacity 0.45s ease;
+    }
+
+    .app.dimmed {
+      filter: blur(10px) saturate(0.85);
+      opacity: 0.42;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* —— 顶部搜索条 —— */
+    .search-slot {
+      width: 100%;
+      max-width: 420px;
+      flex-shrink: 0;
+      z-index: 5;
+      margin-bottom: 14px;
+    }
+
+    .search-mini {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      cursor: text;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+    }
+
+    .search-mini:hover {
+      background: rgba(255, 255, 255, 0.11);
+      border-color: rgba(125, 211, 168, 0.35);
+    }
+
+    .search-mini svg {
+      flex-shrink: 0;
+      opacity: 0.65;
+    }
+
+    .search-mini span {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    /* 搜索聚焦层 */
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+
+    .search-overlay.open {
+      pointer-events: auto;
+      opacity: 1;
+    }
+
+    .search-overlay-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(8, 12, 18, 0.72);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .search-panel {
+      position: relative;
+      width: min(100%, 440px);
+      transform: scale(0.88) translateY(-12px);
+      opacity: 0;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+    }
+
+    .search-overlay.open .search-panel {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    .search-panel-inner {
+      background: linear-gradient(165deg, #243042 0%, #1a2430 100%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: var(--radius);
+      padding: 20px 20px 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .search-panel h2 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    .search-input-wrap {
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-input-wrap input {
+      flex: 1;
+      min-width: 0;
+      padding: 14px 16px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--text);
+      outline: none;
+    }
+
+    .search-input-wrap input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .search-input-wrap input::placeholder {
+      color: var(--muted);
+    }
+
+    .btn-search {
+      padding: 0 20px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #0f1419;
+      background: var(--accent);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-search:active {
+      transform: scale(0.97);
+    }
+
+    .search-hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .btn-close-search {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    /* 未收录提示 */
+    .search-inline-toast {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(240, 160, 168, 0.12);
+      border: 1px solid rgba(240, 160, 168, 0.4);
+      color: var(--danger);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.45;
+      opacity: 0;
+      max-height: 0;
+      margin-top: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      overflow: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s ease, max-height 0.35s ease, margin-top 0.35s ease, padding 0.35s ease;
+    }
+
+    .search-inline-toast.show {
+      opacity: 1;
+      max-height: 120px;
+      margin-top: 14px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+      pointer-events: auto;
+    }
+
+    /* —— 主卡片区：stage 宽度/位置保持 420px 居中不变；箭头在 viewport 两侧留白 —— */
+    .stage-strip {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      justify-content: center;
+      width: 100%;
+      min-height: 0;
+      gap: clamp(6px, 2vw, 16px);
+    }
+
+    /* 不可设 width:100%，否则在 flex 行内会占满整条 strip，两侧箭头列宽被压成 0 */
+    .stage {
+      flex: 0 1 420px;
+      max-width: 420px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+    }
+
+    .stage-gutter-decor {
+      flex: 1 1 0;
+      min-width: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 4px;
+      pointer-events: none;
+      user-select: none;
+      color: var(--text);
+      opacity: 0.52;
+    }
+
+    /* 高度由 JS 设 --chevron-h = cardFrame 高度的 30%；两条 path 仅描边、夹角 100°、中间透明 */
+    .stage-gutter-decor .stage-chevron {
+      display: block;
+      height: var(--chevron-h, 3.25rem);
+      width: auto;
+      min-height: 1.25rem;
+      flex-shrink: 0;
+      overflow: visible;
+    }
+
+    .card-frame {
+      width: 100%;
+      aspect-ratio: 1;
+      max-height: min(72vw, 72dvh, 420px);
+      position: relative;
+      touch-action: pan-y;
+      user-select: none;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow), 0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+    }
+
+    .card.swipe-left {
+      transform: translateX(-28px);
+      opacity: 0.65;
+    }
+
+    .card.swipe-right {
+      transform: translateX(28px);
+      opacity: 0.65;
+    }
+
+    .card-image-wrap {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      background: var(--bg-soft);
+    }
+
+    .card-image-ph {
+      position: absolute;
+      inset: 0;
+      transition: opacity 0.45s ease;
+    }
+
+    .card-image-ph.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .card-image-wrap img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .card-image-wrap img.loaded {
+      opacity: 1;
+      cursor: zoom-in;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 250;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+        max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      pointer-events: none;
+    }
+
+    .lightbox.open {
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lightbox-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(6, 10, 16, 0.88);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor: zoom-out;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: max(12px, env(safe-area-inset-top));
+      right: max(12px, env(safe-area-inset-right));
+      z-index: 2;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      font-size: 26px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .lightbox-stage {
+      position: relative;
+      z-index: 1;
+      max-width: 100%;
+      max-height: min(92vh, 92dvh);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: pan-y;
+    }
+
+    .lightbox-stage img {
+      display: block;
+      max-width: 100%;
+      max-height: min(92vh, 92dvh);
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+      cursor: default;
+    }
+
+    .lightbox-counter {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .lightbox-counter[hidden] {
+      display: none !important;
+    }
+
+    .card-body {
+      flex-shrink: 0;
+      padding: 16px 18px 18px;
+      background: linear-gradient(180deg, #fafbfc 0%, #fff 40%);
+    }
+
+    .card-heading {
+      margin-bottom: 8px;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a2332;
+      letter-spacing: 0.02em;
+      flex: 1;
+      min-width: 0;
+      line-height: 1.35;
+    }
+
+    .card-title-sci {
+      flex-shrink: 0;
+      max-width: 56%;
+      text-align: right;
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 500;
+      font-style: italic;
+      font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+      color: #475569;
+      word-break: break-word;
+    }
+
+    .card-title-en {
+      margin-top: 6px;
+      font-size: 15px;
+      line-height: 1.4;
+      font-weight: 500;
+      color: #64748b;
+      text-align: left;
+    }
+
+    .card-desc {
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.65;
+      color: #4a5568;
+    }
+
+    .card-desc:empty {
+      display: none;
+    }
+
+    .card-meta {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .card-meta a {
+      color: #64748b;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-color: rgba(100, 116, 139, 0.45);
+    }
+
+    .card-meta a:hover {
+      color: #334155;
+      text-decoration-color: rgba(51, 65, 85, 0.55);
+    }
+
+    .hints {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .hints kbd {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 11px;
+      font-family: inherit;
+    }
+
+    .attribution {
+      margin-top: 10px;
+      max-width: 420px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .attribution a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(125, 211, 168, 0.35);
+    }
+
+    .attribution a:hover {
+      border-bottom-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <div class="search-slot">
+      <div class="search-mini" id="searchMini" role="button" tabindex="0" aria-label="打开搜索">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="M20 20l-4-4"/>
+        </svg>
+        <span id="searchMiniLabel">按中/英文名称搜索（支持正则）…</span>
+      </div>
+    </div>
+
+    <div class="stage-strip" id="stageStrip" dir="ltr">
+      <div class="stage-gutter-decor" aria-hidden="true">
+        <!-- 屏左侧：< 尖角在左、开口朝右（向卡片），夹角 100° -->
+        <svg class="stage-chevron" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <path
+            d="M 6 12 L 12.4279 4.3396"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <path
+            d="M 6 12 L 12.4279 19.6604"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+      <div class="stage">
+        <div class="card-frame" id="cardFrame">
+          <div class="card" id="card">
+            <div class="card-image-wrap" id="imgWrap">
+              <div class="card-image-ph" id="imgPh"></div>
+              <img alt="" id="cardImg" decoding="async" tabindex="0" title="点击放大">
+            </div>
+            <div class="card-body">
+              <div class="card-heading">
+                <div class="card-title-row">
+                  <div class="card-title" id="cardTitle">—</div>
+                  <div class="card-title-sci" id="cardTitleSci" hidden></div>
+                </div>
+                <div class="card-title-en" id="cardTitleEn" hidden></div>
+              </div>
+              <p class="card-desc" id="cardDesc"></p>
+              <div class="card-meta" id="cardMeta"></div>
+            </div>
+          </div>
+        </div>
+        <p class="hints">左右滑动或按 <kbd>←</kbd> <kbd>→</kbd> 切换植物</p>
+        <p class="attribution" id="attribution"></p>
+      </div>
+      <div class="stage-gutter-decor" aria-hidden="true">
+        <!-- 屏右侧：> 尖角在右、开口朝左（向卡片），夹角 100° -->
+        <svg class="stage-chevron" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <path
+            d="M 18 12 L 11.5721 4.3396"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+          <path
+            d="M 18 12 L 11.5721 19.6604"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="大图预览">
+    <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
+    <button type="button" class="lightbox-close" id="lightboxClose" aria-label="关闭大图">×</button>
+    <div class="lightbox-stage" id="lightboxStage">
+      <img src="" alt="" id="lightboxImg" draggable="false">
+      <div class="lightbox-counter" id="lightboxCounter" hidden aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="search-overlay" id="searchOverlay" aria-hidden="true">
+    <div class="search-overlay-backdrop" id="searchBackdrop"></div>
+    <div class="search-panel">
+      <button type="button" class="btn-close-search" id="btnCloseSearch" aria-label="关闭">×</button>
+      <div class="search-panel-inner">
+        <h2>搜索百科条目</h2>
+        <div class="search-input-wrap">
+          <input type="search" id="searchInput" placeholder="中文名、英文名或学名，如 月季 / rose / Rosa" autocomplete="off" enterkeyhint="search">
+          <button type="button" class="btn-search" id="btnSearch">搜索</button>
+        </div>
+        <p class="search-hint">匹配<strong>中文名</strong>、<strong>英文名</strong>、<strong>学名</strong>与<strong>描述</strong>（若已填写）。支持 JS 正则，示例：<code>月季</code>、<code>rose|Rosa</code>。结果随机排序。</p>
+        <div class="search-inline-toast" id="searchToast" role="status" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 与 plants.json 同源；支持 file:// 本地双击打开（fetch 无法读本地 JSON） -->
+  <script src="plants.embedded.js"></script>
+  <script>
+(function () {
+  let catalog = [];
+  let TOTAL = 0;
+
+  function hash32(n) {
+    let h = n >>> 0;
+    h ^= h << 13; h >>>= 0;
+    h ^= h >> 17; h >>>= 0;
+    h ^= h << 5; h >>>= 0;
+    return h >>> 0;
+  }
+
+  function mulberry32(a) {
+    return function () {
+      let t = (a += 0x6d2b79f5) >>> 0;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /** 仅缓存最近生成的配图 data URL，避免重复绘制与内存膨胀 */
+  const imageCache = new Map();
+  const CACHE_MAX = 48;
+
+  function cacheSet(id, dataUrl) {
+    if (imageCache.has(id)) imageCache.delete(id);
+    imageCache.set(id, dataUrl);
+    while (imageCache.size > CACHE_MAX) {
+      const first = imageCache.keys().next().value;
+      imageCache.delete(first);
+    }
+  }
+
+  function drawFlowerImage(id) {
+    let cached = imageCache.get(id);
+    if (cached) return cached;
+
+    const rnd = mulberry32(hash32(id * 977 + 13) || 1);
+    const w = 800;
+    const h = 800;
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+
+    const hue = (hash32(id * 31) % 360);
+    const hue2 = (hue + 28 + (hash32(id) % 40)) % 360;
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, `hsl(${hue} 42% 88%)`);
+    g.addColorStop(1, `hsl(${hue2} 38% 72%)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+
+    const cx = w * (0.35 + rnd() * 0.3);
+    const cy = h * (0.38 + rnd() * 0.12);
+    const petals = 5 + (id % 6);
+    const rBase = w * (0.1 + rnd() * 0.06);
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    for (let p = 0; p < petals; p++) {
+      const ang = (p / petals) * Math.PI * 2 + rnd() * 0.2;
+      ctx.save();
+      ctx.rotate(ang);
+      ctx.beginPath();
+      ctx.ellipse(0, -rBase * 0.9, rBase * 0.55, rBase * 1.05, 0, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${(hue + p * 14) % 360} 65% 62% / 0.88)`;
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.beginPath();
+    ctx.arc(0, 0, rBase * 0.35, 0, Math.PI * 2);
+    ctx.fillStyle = `hsl(${(hue + 48) % 360} 72% 48%)`;
+    ctx.fill();
+    ctx.restore();
+
+    ctx.strokeStyle = `hsla(${hue2} 35% 35% / 0.35)`;
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + rBase * 0.2);
+    ctx.quadraticCurveTo(cx + w * 0.08, cy + h * 0.25, cx + w * 0.02, cy + h * 0.42);
+    ctx.stroke();
+
+    ctx.fillStyle = `hsla(${hue} 40% 38% / 0.5)`;
+    for (let k = 0; k < 4; k++) {
+      const lx = rnd() * w * 0.85 + w * 0.05;
+      const ly = rnd() * h * 0.85 + h * 0.08;
+      ctx.beginPath();
+      ctx.ellipse(lx, ly, 18 + rnd() * 24, 10 + rnd() * 14, rnd() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    const out = canvas.toDataURL('image/jpeg', 0.82);
+    cacheSet(id, out);
+    return out;
+  }
+
+  function placeholderStyle(id) {
+    const h = hash32(id + 999) % 360;
+    const h2 = (h + 40) % 360;
+    return `linear-gradient(145deg, hsl(${h} 45% 78%) 0%, hsl(${h2} 40% 62%) 100%)`;
+  }
+
+  const app = document.getElementById('app');
+  const cardFrame = document.getElementById('cardFrame');
+  const stageStrip = document.getElementById('stageStrip');
+  function updateChevronHeight() {
+    if (!cardFrame || !stageStrip) return;
+    const h = cardFrame.getBoundingClientRect().height;
+    if (h <= 0) return;
+    stageStrip.style.setProperty('--chevron-h', `${Math.round(h * 0.3)}px`);
+  }
+
+  const chevronResizeObserver = new ResizeObserver(() => {
+    requestAnimationFrame(updateChevronHeight);
+  });
+  chevronResizeObserver.observe(cardFrame);
+  window.addEventListener('resize', updateChevronHeight);
+  const cardEl = document.getElementById('card');
+  const imgPh = document.getElementById('imgPh');
+  const cardImg = document.getElementById('cardImg');
+  const cardTitle = document.getElementById('cardTitle');
+  const cardTitleSci = document.getElementById('cardTitleSci');
+  const cardTitleEn = document.getElementById('cardTitleEn');
+  const cardDesc = document.getElementById('cardDesc');
+  const cardMeta = document.getElementById('cardMeta');
+  const lightbox = document.getElementById('lightbox');
+  const lightboxStage = document.getElementById('lightboxStage');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxCounter = document.getElementById('lightboxCounter');
+  const lightboxBackdrop = document.getElementById('lightboxBackdrop');
+  const lightboxClose = document.getElementById('lightboxClose');
+
+  /** image 字段支持逗号分隔多图路径/URL；卡片只用第一张 */
+  function parseImageList(raw) {
+    if (raw == null || raw === '') return [];
+    return String(raw)
+      .split(',')
+      .map(function (s) {
+        return s.trim();
+      })
+      .filter(Boolean);
+  }
+
+  let galleryUrls = [];
+  let lightboxGallery = [];
+  let lightboxSlideIndex = 0;
+  let lightboxTitleAlt = '';
+
+  function clampLightboxIndex(i) {
+    const n = lightboxGallery.length;
+    if (n <= 0) return 0;
+    return ((i % n) + n) % n;
+  }
+
+  function updateLightboxCounter() {
+    if (lightboxGallery.length > 1) {
+      lightboxCounter.textContent = lightboxSlideIndex + 1 + ' / ' + lightboxGallery.length;
+      lightboxCounter.hidden = false;
+    } else {
+      lightboxCounter.hidden = true;
+      lightboxCounter.textContent = '';
+    }
+  }
+
+  function setLightboxSlide(i) {
+    lightboxSlideIndex = clampLightboxIndex(i);
+    lightboxImg.src = lightboxGallery[lightboxSlideIndex];
+    lightboxImg.alt =
+      lightboxTitleAlt +
+      (lightboxGallery.length > 1 ? '（图 ' + (lightboxSlideIndex + 1) + '）' : '');
+    updateLightboxCounter();
+  }
+
+  function openImageLightbox() {
+    let g = galleryUrls.length ? galleryUrls.slice() : [];
+    const cs = cardImg.getAttribute('src');
+    if (!g.length && cs) g = [cs];
+    if (!g.length) return;
+    if (g.length === 1) {
+      const only = g[0];
+      if (only === cs && cardImg.naturalWidth <= 0 && !only.startsWith('data:')) return;
+    }
+    lightboxGallery = g;
+    lightboxTitleAlt = cardImg.alt || '';
+    setLightboxSlide(0);
+    lightbox.classList.add('open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeImageLightbox() {
+    lightbox.classList.remove('open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    lightboxImg.removeAttribute('src');
+    lightboxGallery = [];
+    lightboxSlideIndex = 0;
+    lightboxCounter.hidden = true;
+    lightboxCounter.textContent = '';
+    document.body.style.overflow = '';
+  }
+
+  cardImg.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openImageLightbox();
+  });
+  cardImg.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openImageLightbox();
+    }
+  });
+  lightboxBackdrop.addEventListener('click', closeImageLightbox);
+  lightboxClose.addEventListener('click', closeImageLightbox);
+
+  let lbTouchX0 = 0;
+  let lbTouchY0 = 0;
+  lightbox.addEventListener(
+    'touchstart',
+    (e) => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.touches.length !== 1) return;
+      lbTouchX0 = e.touches[0].clientX;
+      lbTouchY0 = e.touches[0].clientY;
+    },
+    { passive: true }
+  );
+  lightbox.addEventListener(
+    'touchend',
+    (e) => {
+      if (!lightbox.classList.contains('open') || lightboxGallery.length <= 1) return;
+      if (!e.changedTouches.length) return;
+      const dx = e.changedTouches[0].clientX - lbTouchX0;
+      const dy = e.changedTouches[0].clientY - lbTouchY0;
+      if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy)) return;
+      if (dx < 0) setLightboxSlide(lightboxSlideIndex + 1);
+      else setLightboxSlide(lightboxSlideIndex - 1);
+    },
+    { passive: true }
+  );
+
+  let lbPtrDown = false;
+  let lbPtrX = 0;
+  let lbPtrId = null;
+  lightboxStage.addEventListener('pointerdown', (e) => {
+    if (!lightbox.classList.contains('open') || lightboxGallery.length <= 1) return;
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    lbPtrDown = true;
+    lbPtrX = e.clientX;
+    lbPtrId = e.pointerId;
+  });
+  document.addEventListener(
+    'pointerup',
+    (e) => {
+      if (!lbPtrDown || e.pointerId !== lbPtrId) return;
+      const startX = lbPtrX;
+      lbPtrDown = false;
+      lbPtrId = null;
+      if (!lightbox.classList.contains('open')) return;
+      if (e.pointerType !== 'mouse' || e.button !== 0) return;
+      if (lightboxGallery.length <= 1) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) < 56) return;
+      if (dx < 0) setLightboxSlide(lightboxSlideIndex + 1);
+      else setLightboxSlide(lightboxSlideIndex - 1);
+    },
+    true
+  );
+  document.addEventListener(
+    'pointercancel',
+    (e) => {
+      if (e.pointerId === lbPtrId) {
+        lbPtrDown = false;
+        lbPtrId = null;
+      }
+    },
+    true
+  );
+
+  /** 第一行：中文 + 右侧学名；第二行：英文俗名左对齐 */
+  function setHeading(entry) {
+    let en = (entry.nameEn || '').trim();
+    let sci = (entry.nameSci || '').trim();
+    if (sci && en && sci.toLowerCase() === en.toLowerCase()) {
+      en = '';
+    }
+
+    if (sci) {
+      cardTitleSci.textContent = sci;
+      cardTitleSci.hidden = false;
+    } else {
+      cardTitleSci.textContent = '';
+      cardTitleSci.hidden = true;
+    }
+
+    if (en) {
+      cardTitleEn.textContent = en;
+      cardTitleEn.hidden = false;
+    } else {
+      cardTitleEn.textContent = '';
+      cardTitleEn.hidden = true;
+    }
+  }
+
+  function setCardMeta(entry, wikiLabel) {
+    cardMeta.textContent = '';
+    const prefix =
+      mode === 'search' ? `搜索 · ${index + 1} / ${deck.length}` : `随机 · 共 ${TOTAL} 种`;
+    cardMeta.appendChild(document.createTextNode(prefix));
+    const url = (entry.wiki || '').trim();
+    if (wikiLabel && url) {
+      cardMeta.appendChild(document.createTextNode(' · 维基：'));
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = wikiLabel;
+      cardMeta.appendChild(a);
+    } else if (wikiLabel) {
+      cardMeta.appendChild(document.createTextNode(' · 维基：' + wikiLabel));
+    }
+  }
+
+  const searchMini = document.getElementById('searchMini');
+  const searchMiniLabel = document.getElementById('searchMiniLabel');
+  const searchOverlay = document.getElementById('searchOverlay');
+  const searchBackdrop = document.getElementById('searchBackdrop');
+  const searchInput = document.getElementById('searchInput');
+  const btnSearch = document.getElementById('btnSearch');
+  const btnCloseSearch = document.getElementById('btnCloseSearch');
+  const searchToast = document.getElementById('searchToast');
+
+  const SEARCH_PLACEHOLDER = '按中/英文名称搜索（支持正则）…';
+
+  let mode = 'browse';
+  let deck = [];
+  let index = 0;
+  let browseId = 0;
+  let currentId = -1;
+  let loadToken = 0;
+  let searchToastTimer = 0;
+  /** 最近一次成功搜索的查询词；清空输入后清除并回到随机模式 */
+  let savedSearchQuery = '';
+
+  function updateSearchMiniLabel() {
+    if (!searchMiniLabel) return;
+    if (mode === 'search' && savedSearchQuery) {
+      const vis = savedSearchQuery.length > 42 ? savedSearchQuery.slice(0, 40) + '…' : savedSearchQuery;
+      searchMiniLabel.textContent = '搜索：' + vis;
+    } else {
+      searchMiniLabel.textContent = SEARCH_PLACEHOLDER;
+    }
+  }
+
+  function shuffleInPlace(arr) {
+    const rnd = mulberry32(Date.now() % 0xffffffff || 1);
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function randomIdExcluding(exclude) {
+    if (TOTAL <= 1) return 0;
+    let id = exclude;
+    let guard = 0;
+    while (id === exclude && guard++ < 32) {
+      id = (Math.random() * TOTAL) | 0;
+    }
+    if (id === exclude) id = (exclude + 1 + ((Math.random() * (TOTAL - 1)) | 0)) % TOTAL;
+    return id;
+  }
+
+  function showSearchToast(msg, ms) {
+    clearTimeout(searchToastTimer);
+    searchToast.textContent = msg;
+    searchToast.classList.add('show');
+    searchToastTimer = setTimeout(() => {
+      searchToast.classList.remove('show');
+    }, ms || 2400);
+  }
+
+  function initBrowse() {
+    mode = 'browse';
+    deck = [];
+    index = 0;
+    savedSearchQuery = '';
+    if (searchInput) searchInput.value = '';
+    updateSearchMiniLabel();
+    if (TOTAL <= 0) {
+      cardTitle.textContent = '暂无数据';
+      cardTitleSci.textContent = '';
+      cardTitleSci.hidden = true;
+      cardTitleEn.textContent = '';
+      cardTitleEn.hidden = true;
+      cardDesc.textContent = '';
+      cardMeta.textContent = '';
+      cardImg.removeAttribute('src');
+      return;
+    }
+    browseId = (Math.random() * TOTAL) | 0;
+    showCurrent(false);
+  }
+
+  function exitSearchToBrowseIfInputEmpty() {
+    const v = (searchInput && searchInput.value) || '';
+    if (mode === 'search' && !v.trim()) {
+      savedSearchQuery = '';
+      mode = 'browse';
+      deck = [];
+      index = 0;
+      updateSearchMiniLabel();
+      if (searchOverlay.classList.contains('open')) {
+        closeSearchOverlay();
+      }
+      if (TOTAL > 0) {
+        browseId = (Math.random() * TOTAL) | 0;
+        showCurrent(false);
+      }
+    }
+  }
+
+  function runSearch(raw) {
+    if (TOTAL <= 0) {
+      showSearchToast('数据尚未载入', 2200);
+      return;
+    }
+    const q = (raw || '').trim();
+    if (!q) {
+      showSearchToast('请输入中文名、英文名或正则', 2200);
+      return;
+    }
+    let re;
+    try {
+      re = new RegExp(q, 'iu');
+    } catch (e) {
+      showSearchToast('正则表达式无效', 2600);
+      return;
+    }
+    const hits = [];
+    for (let i = 0; i < TOTAL; i++) {
+      const e = catalog[i];
+      if (
+        re.test(e.nameZh) ||
+        re.test(e.nameEn || '') ||
+        re.test(e.nameSci || '') ||
+        re.test(e.desc || '')
+      ) {
+        hits.push(i);
+      }
+    }
+    if (hits.length === 0) {
+      showSearchToast('暂未收录', 2800);
+      return;
+    }
+    mode = 'search';
+    savedSearchQuery = q;
+    updateSearchMiniLabel();
+    deck = shuffleInPlace(hits);
+    index = 0;
+    searchToast.classList.remove('show');
+    clearTimeout(searchToastTimer);
+    closeSearchOverlay();
+    showCurrent(false);
+  }
+
+  function currentEntry() {
+    if (TOTAL <= 0) return null;
+    if (mode === 'browse') return catalog[browseId];
+    if (!deck.length) return null;
+    return catalog[deck[index]];
+  }
+
+  function showCurrent(animate) {
+    const entry = currentEntry();
+    if (!entry) return;
+    const my = ++loadToken;
+    currentId = entry.id;
+
+    cardTitle.textContent = entry.nameZh;
+    setHeading(entry);
+    cardDesc.textContent = (entry.desc != null ? String(entry.desc) : '').trim();
+    const wikiShort = (entry.wiki || '').replace(/^https?:\/\/zh\.wikipedia\.org\/wiki\//, '');
+    let wikiLabel = '';
+    if (wikiShort) {
+      try {
+        wikiLabel = decodeURIComponent(wikiShort.replace(/_/g, ' '));
+      } catch (e) {
+        wikiLabel = wikiShort.replace(/_/g, ' ');
+      }
+    }
+    setCardMeta(entry, wikiLabel);
+
+    cardImg.classList.remove('loaded');
+    cardImg.removeAttribute('src');
+    cardImg.alt = entry.nameZh;
+    imgPh.style.background = placeholderStyle(entry.id);
+    imgPh.classList.remove('hidden');
+
+    if (animate) {
+      cardEl.classList.remove('swipe-left', 'swipe-right');
+    }
+
+    requestAnimationFrame(() => {
+      if (my !== loadToken) return;
+      function reveal() {
+        if (my !== loadToken) return;
+        cardImg.classList.add('loaded');
+        imgPh.classList.add('hidden');
+      }
+      cardImg.onload = function () {
+        reveal();
+      };
+      cardImg.onerror = function () {
+        if (my !== loadToken) return;
+        cardImg.onerror = null;
+        cardImg.onload = function () {
+          reveal();
+        };
+        cardImg.src = drawFlowerImage(entry.id);
+      };
+      galleryUrls = parseImageList(entry.image);
+      const first = galleryUrls[0];
+      if (first) {
+        cardImg.src = first;
+      } else {
+        cardImg.src = drawFlowerImage(entry.id);
+      }
+      if (cardImg.complete && cardImg.naturalWidth) {
+        reveal();
+      }
+      requestAnimationFrame(function () {
+        requestAnimationFrame(updateChevronHeight);
+      });
+    });
+  }
+
+  function nextCard() {
+    if (TOTAL <= 0) return;
+    if (mode === 'browse') {
+      browseId = randomIdExcluding(browseId);
+    } else {
+      if (deck.length === 0) return;
+      index = (index + 1) % deck.length;
+    }
+    showCurrent(true);
+  }
+
+  function prevCard() {
+    if (TOTAL <= 0) return;
+    if (mode === 'browse') {
+      browseId = randomIdExcluding(browseId);
+    } else {
+      if (deck.length === 0) return;
+      index = (index - 1 + deck.length) % deck.length;
+    }
+    showCurrent(true);
+  }
+
+  function openSearchOverlay() {
+    searchToast.classList.remove('show');
+    clearTimeout(searchToastTimer);
+    searchOverlay.classList.add('open');
+    searchOverlay.setAttribute('aria-hidden', 'false');
+    app.classList.add('dimmed');
+    if (searchInput) {
+      searchInput.value = savedSearchQuery;
+    }
+    setTimeout(() => searchInput.focus(), 120);
+  }
+
+  function closeSearchOverlay() {
+    searchOverlay.classList.remove('open');
+    searchOverlay.setAttribute('aria-hidden', 'true');
+    app.classList.remove('dimmed');
+    searchInput.blur();
+  }
+
+  searchMini.addEventListener('click', openSearchOverlay);
+  searchMini.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openSearchOverlay();
+    }
+  });
+  btnCloseSearch.addEventListener('click', closeSearchOverlay);
+  searchBackdrop.addEventListener('click', closeSearchOverlay);
+  btnSearch.addEventListener('click', () => runSearch(searchInput.value));
+  searchInput.addEventListener('input', () => {
+    exitSearchToBrowseIfInputEmpty();
+  });
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      runSearch(searchInput.value);
+    }
+    if (e.key === 'Escape') closeSearchOverlay();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (lightbox.classList.contains('open')) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeImageLightbox();
+      } else if (lightboxGallery.length > 1 && e.key === 'ArrowRight') {
+        e.preventDefault();
+        setLightboxSlide(lightboxSlideIndex + 1);
+      } else if (lightboxGallery.length > 1 && e.key === 'ArrowLeft') {
+        e.preventDefault();
+        setLightboxSlide(lightboxSlideIndex - 1);
+      }
+      return;
+    }
+    if (searchOverlay.classList.contains('open')) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      nextCard();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      prevCard();
+    }
+  });
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+  cardFrame.addEventListener(
+    'touchstart',
+    (e) => {
+      if (e.touches.length !== 1) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    },
+    { passive: true }
+  );
+  cardFrame.addEventListener(
+    'touchend',
+    (e) => {
+      if (!e.changedTouches.length) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
+      if (dx < 0) nextCard();
+      else prevCard();
+    },
+    { passive: true }
+  );
+
+  let ptrDown = false;
+  let ptrX = 0;
+  let ptrId = null;
+  cardFrame.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    ptrDown = true;
+    ptrX = e.clientX;
+    ptrId = e.pointerId;
+    // 不可 setPointerCapture(cardFrame)：在配图上按下时会把 pointerup 送到 cardFrame，img 无法收到 click
+  });
+  function finishMouseSwipe(e) {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    if (!ptrDown || e.pointerId !== ptrId) return;
+    ptrDown = false;
+    ptrId = null;
+    const dx = e.clientX - ptrX;
+    if (Math.abs(dx) < 56) return;
+    if (dx < 0) nextCard();
+    else prevCard();
+  }
+  document.addEventListener('pointerup', finishMouseSwipe, true);
+  document.addEventListener(
+    'pointercancel',
+    (e) => {
+      if (e.pointerId === ptrId) {
+        ptrDown = false;
+        ptrId = null;
+      }
+    },
+    true
+  );
+
+  const attributionEl = document.getElementById('attribution');
+
+  function applyPayload(data) {
+    catalog = data.plants || [];
+    TOTAL = catalog.length;
+    if (attributionEl && data.source) {
+      attributionEl.textContent = '';
+      attributionEl.appendChild(document.createTextNode(data.source + ' '));
+      const a = document.createElement('a');
+      a.href = data.attribution || 'https://zh.wikipedia.org';
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = '维基百科与许可说明';
+      attributionEl.appendChild(a);
+      attributionEl.appendChild(document.createTextNode('。'));
+    }
+    initBrowse();
+  }
+
+  const embedded =
+    typeof window.__PLANTS_PAYLOAD__ === 'object' &&
+    window.__PLANTS_PAYLOAD__ &&
+    Array.isArray(window.__PLANTS_PAYLOAD__.plants) &&
+    window.__PLANTS_PAYLOAD__.plants.length;
+
+  if (embedded) {
+    applyPayload(window.__PLANTS_PAYLOAD__);
+  } else {
+    fetch('./plants.json')
+      .then((r) => {
+        if (!r.ok) throw new Error('bad status');
+        return r.json();
+      })
+      .then((data) => applyPayload(data))
+      .catch(() => {
+        catalog = [];
+        TOTAL = 0;
+        if (attributionEl) {
+          attributionEl.textContent =
+            '未找到植物数据：请确保 plants.embedded.js 与 index.html 同目录，或使用本地服务器打开以加载 plants.json。';
+        }
+        initBrowse();
+      });
+  }
+})();
+  </script>
+</body>
+</html>
