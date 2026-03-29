@@ -65,6 +65,12 @@
       margin-bottom: 14px;
     }
 
+    @media (max-width: 768px) {
+      .search-slot {
+        margin-top: 10dvh;
+      }
+    }
+
     .search-mini {
       width: 100%;
       display: flex;
@@ -243,7 +249,7 @@
       pointer-events: auto;
     }
 
-    /* —— 主卡片区：stage 宽度/位置保持 420px 居中不变；箭头在 viewport 两侧留白 —— */
+    /* —— 主卡片区：420px 卡片居中 —— */
     .stage-strip {
       flex: 1;
       display: flex;
@@ -252,14 +258,13 @@
       justify-content: center;
       width: 100%;
       min-height: 0;
-      gap: clamp(6px, 2vw, 16px);
     }
 
-    /* 不可设 width:100%，否则在 flex 行内会占满整条 strip，两侧箭头列宽被压成 0 */
     .stage {
       flex: 0 1 420px;
       max-width: 420px;
       min-width: 0;
+      width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -267,36 +272,12 @@
       min-height: 0;
     }
 
-    .stage-gutter-decor {
-      flex: 1 1 0;
-      min-width: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0;
-      padding: 4px;
-      pointer-events: none;
-      user-select: none;
-      color: var(--text);
-      opacity: 0.52;
-    }
-
-    /* 高度由 JS 设 --chevron-h = cardFrame 高度的 30%；两条 path 仅描边、夹角 100°、中间透明 */
-    .stage-gutter-decor .stage-chevron {
-      display: block;
-      height: var(--chevron-h, 3.25rem);
-      width: auto;
-      min-height: 1.25rem;
-      flex-shrink: 0;
-      overflow: visible;
-    }
-
     .card-frame {
       width: 100%;
       aspect-ratio: 1;
       max-height: min(72vw, 72dvh, 420px);
       position: relative;
-      touch-action: pan-y;
+      touch-action: none;
       user-select: none;
     }
 
@@ -577,25 +558,6 @@
     </div>
 
     <div class="stage-strip" id="stageStrip" dir="ltr">
-      <div class="stage-gutter-decor" aria-hidden="true">
-        <!-- 屏左侧：< 尖角在左、开口朝右（向卡片），夹角 100° -->
-        <svg class="stage-chevron" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-          <path
-            d="M 6 12 L 12.4279 4.3396"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-          <path
-            d="M 6 12 L 12.4279 19.6604"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
-      </div>
       <div class="stage">
         <div class="card-frame" id="cardFrame">
           <div class="card" id="card">
@@ -616,27 +578,8 @@
             </div>
           </div>
         </div>
-        <p class="hints">左右滑动或按 <kbd>←</kbd> <kbd>→</kbd> 切换植物</p>
+        <p class="hints">左右滑动或按 <kbd>←</kbd> <kbd>→</kbd> 切换卡片</p>
         <p class="attribution" id="attribution"></p>
-      </div>
-      <div class="stage-gutter-decor" aria-hidden="true">
-        <!-- 屏右侧：> 尖角在右、开口朝左（向卡片），夹角 100° -->
-        <svg class="stage-chevron" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-          <path
-            d="M 18 12 L 11.5721 4.3396"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-          <path
-            d="M 18 12 L 11.5721 19.6604"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
       </div>
     </div>
   </div>
@@ -660,7 +603,7 @@
           <input type="search" id="searchInput" placeholder="中文名、英文名或学名，如 月季 / rose / Rosa" autocomplete="off" enterkeyhint="search">
           <button type="button" class="btn-search" id="btnSearch">搜索</button>
         </div>
-        <p class="search-hint">匹配<strong>中文名</strong>、<strong>英文名</strong>、<strong>学名</strong>与<strong>描述</strong>（若已填写）。支持 JS 正则，示例：<code>月季</code>、<code>rose|Rosa</code>。结果随机排序。</p>
+        <p class="search-hint">匹配<strong>中文名</strong>、<strong>英文名</strong>、<strong>学名</strong>与<strong>描述</strong>。支持 JS 正则，示例：<code>月季</code>、<code>rose|Rosa</code>。结果随机排序。</p>
         <div class="search-inline-toast" id="searchToast" role="status" aria-live="polite"></div>
       </div>
     </div>
@@ -775,19 +718,6 @@
 
   const app = document.getElementById('app');
   const cardFrame = document.getElementById('cardFrame');
-  const stageStrip = document.getElementById('stageStrip');
-  function updateChevronHeight() {
-    if (!cardFrame || !stageStrip) return;
-    const h = cardFrame.getBoundingClientRect().height;
-    if (h <= 0) return;
-    stageStrip.style.setProperty('--chevron-h', `${Math.round(h * 0.3)}px`);
-  }
-
-  const chevronResizeObserver = new ResizeObserver(() => {
-    requestAnimationFrame(updateChevronHeight);
-  });
-  chevronResizeObserver.observe(cardFrame);
-  window.addEventListener('resize', updateChevronHeight);
   const cardEl = document.getElementById('card');
   const imgPh = document.getElementById('imgPh');
   const cardImg = document.getElementById('cardImg');
@@ -872,7 +802,15 @@
     document.body.style.overflow = '';
   }
 
+  /** 横向滑过后抑制紧随其后的「点击放大」，避免误开灯箱 */
+  let suppressLightboxClickUntil = 0;
+
   cardImg.addEventListener('click', (e) => {
+    if (performance.now() < suppressLightboxClickUntil) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     e.stopPropagation();
     openImageLightbox();
   });
@@ -1202,9 +1140,6 @@
       if (cardImg.complete && cardImg.naturalWidth) {
         reveal();
       }
-      requestAnimationFrame(function () {
-        requestAnimationFrame(updateChevronHeight);
-      });
     });
   }
 
@@ -1294,57 +1229,47 @@
     }
   });
 
-  let touchStartX = 0;
-  let touchStartY = 0;
-  cardFrame.addEventListener(
-    'touchstart',
-    (e) => {
-      if (e.touches.length !== 1) return;
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    },
-    { passive: true }
-  );
-  cardFrame.addEventListener(
-    'touchend',
-    (e) => {
-      if (!e.changedTouches.length) return;
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-      if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
-      if (dx < 0) nextCard();
-      else prevCard();
-    },
-    { passive: true }
-  );
+  let cardPtrDown = false;
+  let cardPtrX = 0;
+  let cardPtrY = 0;
+  let cardPtrId = null;
+  let cardPtrType = 'mouse';
 
-  let ptrDown = false;
-  let ptrX = 0;
-  let ptrId = null;
   cardFrame.addEventListener('pointerdown', (e) => {
-    if (e.pointerType !== 'mouse' || e.button !== 0) return;
-    ptrDown = true;
-    ptrX = e.clientX;
-    ptrId = e.pointerId;
-    // 不可 setPointerCapture(cardFrame)：在配图上按下时会把 pointerup 送到 cardFrame，img 无法收到 click
+    if (lightbox.classList.contains('open') || searchOverlay.classList.contains('open')) return;
+    if (e.pointerType === 'pen') return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (e.pointerType === 'touch' || e.pointerType === 'mouse') {
+      cardPtrDown = true;
+      cardPtrX = e.clientX;
+      cardPtrY = e.clientY;
+      cardPtrId = e.pointerId;
+      cardPtrType = e.pointerType;
+    }
   });
-  function finishMouseSwipe(e) {
-    if (e.pointerType !== 'mouse' || e.button !== 0) return;
-    if (!ptrDown || e.pointerId !== ptrId) return;
-    ptrDown = false;
-    ptrId = null;
-    const dx = e.clientX - ptrX;
-    if (Math.abs(dx) < 56) return;
+
+  function finishCardPointerSwipe(e) {
+    if (!cardPtrDown || e.pointerId !== cardPtrId) return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    cardPtrDown = false;
+    cardPtrId = null;
+    const dx = e.clientX - cardPtrX;
+    const dy = e.clientY - cardPtrY;
+    const thresh = cardPtrType === 'touch' ? 36 : 56;
+    const needHoriz = cardPtrType === 'touch' ? 0.72 : 0.85;
+    if (Math.abs(dx) < thresh || Math.abs(dx) < Math.abs(dy) * needHoriz) return;
+    suppressLightboxClickUntil = performance.now() + 480;
     if (dx < 0) nextCard();
     else prevCard();
   }
-  document.addEventListener('pointerup', finishMouseSwipe, true);
+
+  document.addEventListener('pointerup', finishCardPointerSwipe, true);
   document.addEventListener(
     'pointercancel',
     (e) => {
-      if (e.pointerId === ptrId) {
-        ptrDown = false;
-        ptrId = null;
+      if (e.pointerId === cardPtrId) {
+        cardPtrDown = false;
+        cardPtrId = null;
       }
     },
     true
