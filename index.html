@@ -39,13 +39,17 @@
       color: var(--text);
     }
 
+    /* 搜索条与主卡片区同宽（PC / 手机共用，手机在 media 中覆盖） */
+    html {
+      --col-w: min(420px, calc(100vw - 40px));
+    }
+
     .app {
+      position: relative;
       min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
-        max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      display: block;
+      padding: 0 max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
       transition: filter 0.45s ease, opacity 0.45s ease;
     }
 
@@ -56,13 +60,16 @@
       user-select: none;
     }
 
-    /* —— 顶部搜索条 —— */
+    /* —— 搜索条：水平居中，垂直中心在距视口顶 10% 视口高度处 —— */
     .search-slot {
-      width: 100%;
-      max-width: 420px;
-      flex-shrink: 0;
-      z-index: 5;
-      margin-bottom: 14px;
+      position: absolute;
+      left: 50%;
+      top: max(10dvh, calc(env(safe-area-inset-top) + 24px));
+      transform: translate(-50%, -50%);
+      width: var(--col-w);
+      max-width: none;
+      z-index: 6;
+      margin: 0;
     }
 
     .search-mini {
@@ -122,7 +129,8 @@
 
     .search-panel {
       position: relative;
-      width: min(100%, 440px);
+      width: var(--col-w);
+      max-width: none;
       transform: scale(0.88) translateY(-12px);
       opacity: 0;
       transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
@@ -243,27 +251,33 @@
       pointer-events: auto;
     }
 
-    /* —— 主卡片区：420px 卡片居中 —— */
+    /* —— 主卡片区：与搜索条同宽；仅 card-frame（方形卡片区）的垂直中心在 50dvh —— */
     .stage-strip {
-      flex: 1;
+      position: absolute;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      width: var(--col-w);
+      max-width: none;
       display: flex;
       flex-direction: row;
       align-items: stretch;
       justify-content: center;
-      width: 100%;
       min-height: 0;
     }
 
     .stage {
-      flex: 0 1 420px;
-      max-width: 420px;
+      flex: 1 1 auto;
+      max-width: none;
       min-width: 0;
       width: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      align-items: stretch;
+      justify-content: flex-start;
       min-height: 0;
+      /* 使首张流内子元素（card-frame）的几何中心落在 50dvh；S 为方形边长近似 */
+      padding-top: max(0px, calc(50dvh - min(var(--col-w), 72vw, 72dvh, 420px) * 0.5));
     }
 
     .card-frame {
@@ -384,15 +398,29 @@
     .lightbox-stage {
       position: relative;
       z-index: 1;
+      width: 100%;
       max-width: 100%;
+      height: min(92vh, 92dvh);
       max-height: min(92vh, 92dvh);
       display: flex;
       align-items: center;
       justify-content: center;
-      touch-action: pan-y;
+      overflow: hidden;
+      touch-action: none;
     }
 
-    .lightbox-stage img {
+    .lightbox-zoom-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    .lightbox-zoom-wrap img {
       display: block;
       max-width: 100%;
       max-height: min(92vh, 92dvh);
@@ -401,7 +429,15 @@
       object-fit: contain;
       border-radius: 12px;
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
-      cursor: default;
+      cursor: grab;
+      transform-origin: center center;
+      will-change: transform;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .lightbox-zoom-wrap img:active {
+      cursor: grabbing;
     }
 
     .lightbox-counter {
@@ -521,7 +557,7 @@
 
     .attribution {
       margin-top: 10px;
-      max-width: 420px;
+      max-width: 100%;
       text-align: center;
       font-size: 11px;
       color: var(--muted);
@@ -538,36 +574,18 @@
       border-bottom-color: var(--accent);
     }
 
-    /* —— 手机：卡片正方形、宽 90%，与搜索条同宽；减少上下留白 —— */
     @media (max-width: 768px) {
+      html {
+        --col-w: min(90vw, calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 16px));
+      }
+
       .app {
-        justify-content: flex-start;
-        padding: max(6px, env(safe-area-inset-top)) max(5vw, env(safe-area-inset-right))
-          max(10px, env(safe-area-inset-bottom)) max(5vw, env(safe-area-inset-left));
-      }
-
-      .search-slot {
-        width: 90%;
-        max-width: none;
-        margin-top: max(2px, env(safe-area-inset-top));
-        margin-bottom: 10px;
-      }
-
-      .search-panel {
-        width: 90%;
-        max-width: none;
-      }
-
-      .stage-strip {
-        flex: 0 1 auto;
-        align-items: flex-start;
+        padding-left: max(5vw, env(safe-area-inset-left));
+        padding-right: max(5vw, env(safe-area-inset-right));
       }
 
       .stage {
-        width: 90%;
-        max-width: none;
-        justify-content: flex-start;
-        align-items: stretch;
+        padding-top: max(0px, calc(50dvh - var(--col-w) * 0.5));
       }
 
       .card-frame {
@@ -581,8 +599,6 @@
       }
 
       .attribution {
-        max-width: none;
-        width: 100%;
         margin-top: 8px;
       }
     }
@@ -631,7 +647,9 @@
     <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
     <button type="button" class="lightbox-close" id="lightboxClose" aria-label="关闭大图">×</button>
     <div class="lightbox-stage" id="lightboxStage">
-      <img src="" alt="" id="lightboxImg" draggable="false">
+      <div class="lightbox-zoom-wrap" id="lightboxZoomWrap">
+        <img src="" alt="" id="lightboxImg" draggable="false">
+      </div>
       <div class="lightbox-counter" id="lightboxCounter" hidden aria-live="polite"></div>
     </div>
   </div>
@@ -643,7 +661,7 @@
       <div class="search-panel-inner">
         <h2>搜索百科条目</h2>
         <div class="search-input-wrap">
-          <input type="search" id="searchInput" placeholder="中文名、英文名或学名，如 月季 / rose / Rosa" autocomplete="off" enterkeyhint="search">
+          <input type="search" id="searchInput" placeholder="中文名/英文名/学名" autocomplete="off" enterkeyhint="search">
           <button type="button" class="btn-search" id="btnSearch">搜索</button>
         </div>
         <p class="search-hint">匹配<strong>中文名</strong>、<strong>英文名</strong>、<strong>学名</strong>与<strong>描述</strong>。支持 JS 正则，示例：<code>月季</code>、<code>rose|Rosa</code>。结果随机排序。</p>
@@ -771,10 +789,48 @@
   const cardMeta = document.getElementById('cardMeta');
   const lightbox = document.getElementById('lightbox');
   const lightboxStage = document.getElementById('lightboxStage');
+  const lightboxZoomWrap = document.getElementById('lightboxZoomWrap');
   const lightboxImg = document.getElementById('lightboxImg');
   const lightboxCounter = document.getElementById('lightboxCounter');
   const lightboxBackdrop = document.getElementById('lightboxBackdrop');
   const lightboxClose = document.getElementById('lightboxClose');
+
+  const LB_ZOOM_MIN = 1;
+  const LB_ZOOM_MAX = 5;
+  let lbZoom = 1;
+  let lbTx = 0;
+  let lbTy = 0;
+
+  function applyLightboxTransform() {
+    lightboxImg.style.transform = 'translate(' + lbTx + 'px,' + lbTy + 'px) scale(' + lbZoom + ')';
+  }
+
+  function resetLightboxZoom() {
+    lbZoom = 1;
+    lbTx = 0;
+    lbTy = 0;
+    applyLightboxTransform();
+  }
+
+  function lbTouchDist(a, b) {
+    const dx = a.clientX - b.clientX;
+    const dy = a.clientY - b.clientY;
+    return Math.hypot(dx, dy);
+  }
+
+  function clampLbPan() {
+    const wrap = lightboxZoomWrap.getBoundingClientRect();
+    if (wrap.width < 2 || wrap.height < 2) return;
+    const bw = lightboxImg.offsetWidth;
+    const bh = lightboxImg.offsetHeight;
+    if (bw < 2 || bh < 2) return;
+    const sw = bw * lbZoom;
+    const sh = bh * lbZoom;
+    const maxX = Math.max(0, (sw - wrap.width) / 2);
+    const maxY = Math.max(0, (sh - wrap.height) / 2);
+    lbTx = Math.max(-maxX, Math.min(maxX, lbTx));
+    lbTy = Math.max(-maxY, Math.min(maxY, lbTy));
+  }
 
   /** image 字段支持逗号分隔多图路径/URL；卡片只用第一张 */
   function parseImageList(raw) {
@@ -809,6 +865,7 @@
   }
 
   function setLightboxSlide(i) {
+    resetLightboxZoom();
     lightboxSlideIndex = clampLightboxIndex(i);
     lightboxImg.src = lightboxGallery[lightboxSlideIndex];
     lightboxImg.alt =
@@ -837,6 +894,7 @@
   function closeImageLightbox() {
     lightbox.classList.remove('open');
     lightbox.setAttribute('aria-hidden', 'true');
+    resetLightboxZoom();
     lightboxImg.removeAttribute('src');
     lightboxGallery = [];
     lightboxSlideIndex = 0;
@@ -866,53 +924,192 @@
   lightboxBackdrop.addEventListener('click', closeImageLightbox);
   lightboxClose.addEventListener('click', closeImageLightbox);
 
-  let lbTouchX0 = 0;
-  let lbTouchY0 = 0;
-  lightbox.addEventListener(
+  lightboxImg.addEventListener('load', () => {
+    if (lightbox.classList.contains('open')) {
+      clampLbPan();
+      applyLightboxTransform();
+    }
+  });
+
+  lightboxZoomWrap.addEventListener(
+    'wheel',
+    (e) => {
+      if (!lightbox.classList.contains('open')) return;
+      e.preventDefault();
+      const rect = lightboxZoomWrap.getBoundingClientRect();
+      const cx = rect.left + rect.width * 0.5;
+      const cy = rect.top + rect.height * 0.5;
+      const factor = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+      const newZ = Math.max(LB_ZOOM_MIN, Math.min(LB_ZOOM_MAX, lbZoom * factor));
+      if (Math.abs(newZ - lbZoom) < 1e-6) return;
+      const mx = e.clientX - cx;
+      const my = e.clientY - cy;
+      const rz = newZ / lbZoom;
+      lbTx = mx + (lbTx - mx) * rz;
+      lbTy = my + (lbTy - my) * rz;
+      lbZoom = newZ;
+      clampLbPan();
+      applyLightboxTransform();
+    },
+    { passive: false }
+  );
+
+  lightboxZoomWrap.addEventListener('dblclick', (e) => {
+    if (!lightbox.classList.contains('open')) return;
+    e.preventDefault();
+    if (lbZoom > 1.05) {
+      resetLightboxZoom();
+    } else {
+      lbZoom = Math.min(LB_ZOOM_MAX, 2.5);
+      lbTx = 0;
+      lbTy = 0;
+      clampLbPan();
+      applyLightboxTransform();
+    }
+  });
+
+  let lbPinchActive = false;
+  let lbPinchDist0 = 0;
+  let lbPinchZoom0 = 1;
+  let lbTouchPan = false;
+  let lbTouchLastX = 0;
+  let lbTouchLastY = 0;
+  let lbSwipeTouchX0 = 0;
+  let lbSwipeTouchY0 = 0;
+
+  lightboxZoomWrap.addEventListener(
     'touchstart',
     (e) => {
       if (!lightbox.classList.contains('open')) return;
-      if (e.touches.length !== 1) return;
-      lbTouchX0 = e.touches[0].clientX;
-      lbTouchY0 = e.touches[0].clientY;
-    },
-    { passive: true }
-  );
-  lightbox.addEventListener(
-    'touchend',
-    (e) => {
-      if (!lightbox.classList.contains('open') || lightboxGallery.length <= 1) return;
-      if (!e.changedTouches.length) return;
-      const dx = e.changedTouches[0].clientX - lbTouchX0;
-      const dy = e.changedTouches[0].clientY - lbTouchY0;
-      if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy)) return;
-      if (dx < 0) setLightboxSlide(lightboxSlideIndex + 1);
-      else setLightboxSlide(lightboxSlideIndex - 1);
+      if (e.touches.length === 2) {
+        lbPinchActive = true;
+        lbPinchDist0 = lbTouchDist(e.touches[0], e.touches[1]);
+        lbPinchZoom0 = lbZoom;
+        lbTouchPan = false;
+      } else if (e.touches.length === 1) {
+        if (lbZoom > 1.02) {
+          lbTouchPan = true;
+          lbTouchLastX = e.touches[0].clientX;
+          lbTouchLastY = e.touches[0].clientY;
+        } else if (lightboxGallery.length > 1) {
+          lbSwipeTouchX0 = e.touches[0].clientX;
+          lbSwipeTouchY0 = e.touches[0].clientY;
+        }
+      }
     },
     { passive: true }
   );
 
-  let lbPtrDown = false;
-  let lbPtrX = 0;
-  let lbPtrId = null;
-  lightboxStage.addEventListener('pointerdown', (e) => {
-    if (!lightbox.classList.contains('open') || lightboxGallery.length <= 1) return;
-    if (e.pointerType !== 'mouse' || e.button !== 0) return;
-    lbPtrDown = true;
-    lbPtrX = e.clientX;
-    lbPtrId = e.pointerId;
+  lightboxZoomWrap.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!lightbox.classList.contains('open')) return;
+      if (lbPinchActive && e.touches.length >= 2) {
+        e.preventDefault();
+        const d = lbTouchDist(e.touches[0], e.touches[1]);
+        if (lbPinchDist0 > 1) {
+          lbZoom = Math.max(LB_ZOOM_MIN, Math.min(LB_ZOOM_MAX, lbPinchZoom0 * (d / lbPinchDist0)));
+          clampLbPan();
+          applyLightboxTransform();
+        }
+      } else if (lbTouchPan && lbZoom > 1.02 && e.touches.length === 1) {
+        e.preventDefault();
+        const x = e.touches[0].clientX;
+        const y = e.touches[0].clientY;
+        lbTx += x - lbTouchLastX;
+        lbTy += y - lbTouchLastY;
+        lbTouchLastX = x;
+        lbTouchLastY = y;
+        clampLbPan();
+        applyLightboxTransform();
+      }
+    },
+    { passive: false }
+  );
+
+  lightboxZoomWrap.addEventListener(
+    'touchend',
+    (e) => {
+      if (!lightbox.classList.contains('open')) return;
+      if (e.touches.length < 2) lbPinchActive = false;
+      if (e.touches.length === 0) {
+        lbTouchPan = false;
+        if (
+          !lbPinchActive &&
+          lbZoom <= 1.02 &&
+          lightboxGallery.length > 1 &&
+          e.changedTouches.length
+        ) {
+          const dx = e.changedTouches[0].clientX - lbSwipeTouchX0;
+          const dy = e.changedTouches[0].clientY - lbSwipeTouchY0;
+          if (Math.abs(dx) >= 56 && Math.abs(dx) > Math.abs(dy)) {
+            if (dx < 0) setLightboxSlide(lightboxSlideIndex + 1);
+            else setLightboxSlide(lightboxSlideIndex - 1);
+          }
+        }
+      }
+    },
+    { passive: true }
+  );
+
+  let lbMouseSwipe = false;
+  let lbMouseSwipeX0 = 0;
+  let lbMouseSwipeId = null;
+  let lbPanMouse = false;
+  let lbPanMouseX0 = 0;
+  let lbPanMouseY0 = 0;
+  let lbPanMouseTx = 0;
+  let lbPanMouseTy = 0;
+  let lbPanMouseId = null;
+
+  lightboxZoomWrap.addEventListener('pointerdown', (e) => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.button !== 0 || e.pointerType !== 'mouse') return;
+    if (lbZoom > 1.02) {
+      lbPanMouse = true;
+      lbPanMouseX0 = e.clientX;
+      lbPanMouseY0 = e.clientY;
+      lbPanMouseTx = lbTx;
+      lbPanMouseTy = lbTy;
+      lbPanMouseId = e.pointerId;
+      try {
+        lightboxZoomWrap.setPointerCapture(e.pointerId);
+      } catch (err) {}
+    } else if (lightboxGallery.length > 1) {
+      lbMouseSwipe = true;
+      lbMouseSwipeX0 = e.clientX;
+      lbMouseSwipeId = e.pointerId;
+    }
   });
+
+  lightboxZoomWrap.addEventListener('pointermove', (e) => {
+    if (!lightbox.classList.contains('open')) return;
+    if (lbPanMouse && e.pointerId === lbPanMouseId) {
+      lbTx = lbPanMouseTx + (e.clientX - lbPanMouseX0);
+      lbTy = lbPanMouseTy + (e.clientY - lbPanMouseY0);
+      clampLbPan();
+      applyLightboxTransform();
+    }
+  });
+
   document.addEventListener(
     'pointerup',
     (e) => {
-      if (!lbPtrDown || e.pointerId !== lbPtrId) return;
-      const startX = lbPtrX;
-      lbPtrDown = false;
-      lbPtrId = null;
-      if (!lightbox.classList.contains('open')) return;
+      if (lbPanMouse && e.pointerId === lbPanMouseId) {
+        lbPanMouse = false;
+        lbPanMouseId = null;
+        try {
+          lightboxZoomWrap.releasePointerCapture(e.pointerId);
+        } catch (err2) {}
+        return;
+      }
+      if (!lbMouseSwipe || e.pointerId !== lbMouseSwipeId) return;
       if (e.pointerType !== 'mouse' || e.button !== 0) return;
-      if (lightboxGallery.length <= 1) return;
-      const dx = e.clientX - startX;
+      const dx = e.clientX - lbMouseSwipeX0;
+      lbMouseSwipe = false;
+      lbMouseSwipeId = null;
+      if (!lightbox.classList.contains('open') || lightboxGallery.length <= 1) return;
+      if (lbZoom > 1.02) return;
       if (Math.abs(dx) < 56) return;
       if (dx < 0) setLightboxSlide(lightboxSlideIndex + 1);
       else setLightboxSlide(lightboxSlideIndex - 1);
@@ -922,9 +1119,13 @@
   document.addEventListener(
     'pointercancel',
     (e) => {
-      if (e.pointerId === lbPtrId) {
-        lbPtrDown = false;
-        lbPtrId = null;
+      if (e.pointerId === lbPanMouseId) {
+        lbPanMouse = false;
+        lbPanMouseId = null;
+      }
+      if (e.pointerId === lbMouseSwipeId) {
+        lbMouseSwipe = false;
+        lbMouseSwipeId = null;
       }
     },
     true
@@ -1081,7 +1282,7 @@
     }
     const q = (raw || '').trim();
     if (!q) {
-      showSearchToast('请输入中文名、英文名或正则', 2200);
+      showSearchToast('请输入中文名/英文名/正则', 2200);
       return;
     }
     let re;
