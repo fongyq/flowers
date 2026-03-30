@@ -31,15 +31,6 @@
       "wiki": "https://zh.wikipedia.org/wiki/%E5%85%AB%E8%A7%92%E9%87%91%E7%9B%98"
     },
     {
-      "id": 6,
-      "nameZh": "八仙花",
-      "nameEn": "Bigleaf Hydrangea",
-      "nameSci": "Hydrangea macrophylla",
-      "desc": "",
-      "image": "image/006.jpg",
-      "wiki": "https://zh.wikipedia.org/wiki/%E7%BB%A3%E7%90%83%E8%8A%B1"
-    },
-    {
       "id": 7,
       "nameZh": "白掌",
       "nameEn": "",
@@ -1041,7 +1032,7 @@
     {
       "id": 172,
       "nameZh": "花烟草",
-      "nameEn": "Nicotiana × Sanderi",
+      "nameEn": "",
       "nameSci": "Nicotiana × sanderae",
       "desc": "",
       "image": "image/172.jpg",
@@ -2708,8 +2699,8 @@
       "nameZh": "樱花",
       "nameEn": "Sakura",
       "nameSci": "",
-      "desc": "",
-      "image": "image/441.jpg,image/441_1.jpg,image/441_2.jpg",
+      "desc": "花瓣顶部有内凹的缺口（花缺）",
+      "image": "image/441_2.jpg,image/441.jpg,image/441_1.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E6%A8%B1%E8%8A%B1"
     },
     {
