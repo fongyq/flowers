@@ -2421,7 +2421,7 @@
       "nameEn": "Orange Daylily",
       "nameSci": "Hemerocallis fulva",
       "desc": "忘忧草、黄花菜、金针菜",
-      "image": "image/403.jpg",
+      "image": "image/403.jpg,image/749.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E8%90%B1%E8%8D%89"
     },
     {
@@ -4763,15 +4763,6 @@
       "desc": "",
       "image": "image/748.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E5%90%89%E7%A5%A5%E8%8D%89"
-    },
-    {
-      "id": 749,
-      "nameZh": "黄花菜",
-      "nameEn": "Citron Daylily",
-      "nameSci": "Hemerocallis citrina",
-      "desc": "",
-      "image": "image/749.jpg",
-      "wiki": "https://zh.wikipedia.org/wiki/%E9%BB%84%E8%8A%B1%E8%8F%9C"
     },
     {
       "id": 750,
