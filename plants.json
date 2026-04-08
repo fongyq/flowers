@@ -2668,15 +2668,6 @@
       "wiki": "https://zh.wikipedia.org/wiki/%E8%94%B7%E8%96%87"
     },
     {
-      "id": 438,
-      "nameZh": "一串红",
-      "nameEn": "Scarlet Sage",
-      "nameSci": "Salvia splendens",
-      "desc": "",
-      "image": "image/438.jpg",
-      "wiki": "https://zh.wikipedia.org/wiki/%E4%B8%80%E4%B8%B2%E7%BA%A2"
-    },
-    {
       "id": 440,
       "nameZh": "映山红",
       "nameEn": "",
@@ -4547,15 +4538,6 @@
       "desc": "",
       "image": "image/714.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E9%BA%BB%E7%AB%B9"
-    },
-    {
-      "id": 716,
-      "nameZh": "绿竹",
-      "nameEn": "",
-      "nameSci": "Bambusa oldhamii",
-      "desc": "",
-      "image": "image/716.jpg",
-      "wiki": "https://zh.wikipedia.org/wiki/%E7%BB%BF%E7%AB%B9"
     },
     {
       "id": 717,
