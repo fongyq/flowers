@@ -1332,7 +1332,7 @@
       "nameEn": "Chinaberrytree",
       "nameSci": "Melia azedarach",
       "desc": "",
-      "image": "image/224.jpg",
+      "image": "image/224.jpg,image/224_1.jpg,image/224_2.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E8%8B%A6%E6%A5%9D"
     },
     {
@@ -1530,7 +1530,7 @@
       "nameEn": "Moutan Peony",
       "nameSci": "Paeonia suffruticosa",
       "desc": "",
-      "image": "image/258.jpg",
+      "image": "image/258.jpg,image/258_1.jpg,image/258_2.jpg,image/258_3.jpg,image/258_4.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E7%89%A1%E4%B8%B9"
     },
     {
@@ -1611,7 +1611,7 @@
       "nameEn": "Foxglove",
       "nameSci": "Digitalis purpurea",
       "desc": "",
-      "image": "image/270.jpg",
+      "image": "image/270.jpg,image/270_1.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E6%AF%9B%E5%9C%B0%E9%BB%84"
     },
     {
@@ -2547,7 +2547,7 @@
       "nameEn": "Rose",
       "nameSci": "Rosa",
       "desc": "",
-      "image": "image/421.jpg",
+      "image": "image/421.jpg,image/421_1.jpg,image/421_2.jpg,image/421_3.jpg,image/421_4.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E8%94%B7%E8%96%87%E5%B1%9E"
     },
     {
@@ -5753,6 +5753,15 @@
       "desc": "金银花、鸳鸯草",
       "image": "image/916.jpeg",
       "wiki": "https://zh.wikipedia.org/wiki/%E5%BF%8D%E5%86%AC"
+    },
+    {
+      "id": 917,
+      "nameZh": "柿",
+      "nameEn": "",
+      "nameSci": "Diospyros kaki",
+      "desc": "",
+      "image": "image/917.jpg,image/917_1.jpg",
+      "wiki": "https://zh.wikipedia.org/wiki/%E6%9F%BF_(%E6%A4%8D%E7%89%A9)"
     }
   ]
 }
