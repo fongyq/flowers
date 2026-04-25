@@ -395,8 +395,8 @@
       "nameZh": "翠雀",
       "nameEn": "Siberian Larkspur",
       "nameSci": "Delphinium grandiflorum",
-      "desc": "",
-      "image": "image/071.jpg",
+      "desc": "日语名称为大花飞燕草、大飞燕草，而汉语中的大花飞燕草、大飞燕草通常指高山翠雀",
+      "image": "image/071.jpg,image/071_1.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E7%BF%A0%E9%9B%80"
     },
     {
@@ -450,7 +450,7 @@
       "nameEn": "Pinnate Dahlia",
       "nameSci": "Dahlia pinnata",
       "desc": "",
-      "image": "image/081.jpg",
+      "image": "image/081.jpg,image/081_1.jpg,image/081_2.jpg,image/081_3.jpg,image/081_4.jpg,image/081_5.jpg,image/081_6.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E5%A4%A7%E9%BA%97%E8%8A%B1"
     },
     {
@@ -1035,7 +1035,7 @@
       "nameEn": "",
       "nameSci": "Nicotiana × sanderae",
       "desc": "",
-      "image": "image/172.jpg",
+      "image": "image/172.jpg,image/172_1.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E8%8A%B1%E7%83%9F%E8%8D%89"
     },
     {
