@@ -3356,8 +3356,8 @@
       "nameZh": "凤凰木",
       "nameEn": "Royal Poinciana",
       "nameSci": "Delonix regia",
-      "desc": "",
-      "image": "image/543.jpg",
+      "desc": "华丽的花朵以及外观如蕨类植物般的绿叶",
+      "image": "image/543.jpg,image/543_1.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E9%B3%B3%E5%87%B0%E6%9C%A8"
     },
     {
@@ -3635,8 +3635,8 @@
       "nameZh": "皂荚",
       "nameEn": "",
       "nameSci": "Gleditsia sinensis",
-      "desc": "",
-      "image": "image/576.jpg",
+      "desc": "皂角树，其果实和种子可以用来制作肥皂；树干上有圆刺。",
+      "image": "image/576.jpg,image/576_1.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E7%9A%82%E8%8D%9A"
     },
     {
