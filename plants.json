@@ -1485,7 +1485,7 @@
       "nameEn": "",
       "nameSci": "Chionanthus retusus",
       "desc": "",
-      "image": "image/254.jpg",
+      "image": "image/254.jpg,image/254_1.jpeg",
       "wiki": "https://zh.wikipedia.org/wiki/%E6%B5%81%E8%8B%8F"
     },
     {
@@ -3410,8 +3410,8 @@
       "nameZh": "枫杨",
       "nameEn": "Chinese Wingnut",
       "nameSci": "Pterocarya stenoptera",
-      "desc": "",
-      "image": "image/551.jpg",
+      "desc": "果序串状下垂",
+      "image": "image/551.jpg,image/551_1.jpg",
       "wiki": "https://zh.wikipedia.org/wiki/%E6%9E%AB%E6%9D%A8"
     },
     {
